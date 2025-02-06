@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Compiler</title>
+    
+    <!-- CodeMirror for Code Editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/display/placeholder.min.js"></script>
+
+    <style>
+        /* Navigation Bar Styling */
+        /* General Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e; /* Dark background for the editor */
+            color: #ffffff; /* White text for contrast */
+        }
+        
+        /* Navigation Bar Styling */
+        nav {
+            height: 60px;
+            background-color: #252526; /* Darker shade for the nav bar */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+        }
+        
+        nav img {
+            height: 30px; /* Slightly larger logo */
+            border-radius: 100px;
+        }
+        
+        nav span {
+            margin-left: 10px;
+            font-size: 24px;
+            font-weight: 600;
+            color: #61dafb; /* Accent color for the title */
+        }
+        
+        nav button {
+            background-color: #61dafb; /* Bright accent color for the button */
+            color: #1e1e1e; /* Dark text for contrast */
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 5px; /* Rounded corners */
+            transition: background-color 0.3s ease;
+        }
+        
+        nav button:hover {
+            background-color: #4fa8c7; /* Slightly darker on hover */
+        }
+        
+        /* Form Styling */
+        form {
+            margin: 20px;
+            padding: 20px;
+            background-color: #252526; /* Dark background for the form */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+        }
+        
+        label {
+            color: #61dafb; /* Accent color for labels */
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        select {
+            margin-left: 10px;
+            padding: 8px 12px;
+            font-size: 16px;
+            background-color: #333333; /* Dark background for dropdown */
+            color: #ffffff; /* White text */
+            border: 1px solid #61dafb; /* Accent border */
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #4fa8c7; /* Slightly darker on focus */
+        }
+        
+        /* CodeMirror Editor Styling */
+        .CodeMirror {
+            border: 1px solid #61dafb; /* Accent border */
+            border-radius: 5px; /* Rounded corners */
+            height: 400px; /* Larger editor area */
+            margin-top: 20px;
+            font-size: 16px;
+            background-color: #1e1e1e; /* Dark background for the editor */
+        }
+        
+        .CodeMirror-gutters {
+            background-color: #252526; /* Darker background for gutters */
+            border-right: 1px solid #61dafb; /* Accent border */
+        }
+        
+        .CodeMirror-linenumber {
+            color: #61dafb; /* Accent color for line numbers */
+        }
+        
+        /* Output and Error Containers */
+        .output-container, .error-container {
+            margin: 20px;
+            padding: 20px;
+            background-color: #252526; /* Dark background for containers */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+        }
+        
+        .output-container h2, .error-container h2 {
+            color: #61dafb; /* Accent color for headings */
+            margin-bottom: 10px;
+        }
+        
+        pre {
+            background-color: #1e1e1e; /* Dark background for pre tags */
+            color: lime; /* Green text for output */
+            padding: 10px;
+            border-radius: 5px; /* Rounded corners */
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .error-container pre {
+            color: #ff5555; /* Red text for errors */
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            nav span {
+                font-size: 20px; /* Smaller font for smaller screens */
+            }
+        
+            nav button {
+                padding: 8px 16px; /* Smaller button for smaller screens */
+            }
+        
+            .CodeMirror {
+                height: 300px; /* Smaller editor for smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div>
+            <img src="/static/j.jpg" alt="image">
+            <span>  |     Online Compiler</span>
+        </div>
+
+        <!-- Run Button (Outside the form) -->
+        <button class="run" type="button" id="runButton">▶</button>
+    </nav>
+
+    <!-- Language Selector (Inside form) -->
+    <form id="compilerForm" method="post">
+        <label for="language">Select Language:</label>
+        <select name="language" id="language" onchange="changeLanguage()">
+            <option value="python" {% if language == "python" %}selected{% endif %}>Python</option>
+            <option value="cpp" {% if language == "cpp" %}selected{% endif %}>C++</option>
+            <option value="java" {% if language == "java" %}selected{% endif %}>Java</option>
+        </select>
+        
+        <br><br>
+        
+        <!-- CodeMirror Textarea -->
+        <textarea name="code" id="code">{{ code }}</textarea><br>
+    </form>
+
+    <div id="outputContainer" class="output-container">
+        <h2>Output:</h2>
+        <pre id="output">{{ output }}</pre>
+    </div>
+
+    <div id="errorContainer" class="error-container">
+        <h2>Error:</h2>
+        <pre id="error" style="color:red;">{{ error }}</pre>
+    </div>
+
+    <script>
+        let editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            mode: "text/x-python",
+            theme: "dracula",
+            lineNumbers: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            indentUnit: 4,
+            tabSize: 4,
+            extraKeys: { "Tab": function(cm) { cm.execCommand("insertSoftTab"); } }
+        });
+
+        function changeLanguage() {
+            let language = document.getElementById("language").value;
+            let mode = "text/x-python";
+            if (language === "cpp") mode = "text/x-c++src";
+            if (language === "java") mode = "text/x-java";
+
+            editor.setOption("mode", mode);
+        }
+
+        function clearOutput() {
+            document.getElementById("output").innerText = "";
+            document.getElementById("error").innerText = "";
+            document.getElementById("outputContainer").style.display = "none";
+            document.getElementById("errorContainer").style.display = "none";
+        }
+
+        // Handle the "Run" button click to submit the form
+        document.getElementById("runButton").addEventListener("click", function() {
+            clearOutput();  // Clear previous output and error
+
+            // Trigger the form submission when the Run button is clicked
+            document.getElementById("compilerForm").submit();
+        });
+        
+        editor.setValue(`{{ code | safe }}`);
+
+        // Show output or error if available
+        {% if output %}
+            document.getElementById("outputContainer").style.display = "block";
+        {% endif %}
+
+        {% if error %}
+            document.getElementById("errorContainer").style.display = "block";
+        {% endif %}
+    </script>
+
+</body>
+</html>

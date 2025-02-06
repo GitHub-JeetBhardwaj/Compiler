@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Compiler</title>
+    
+    <!-- CodeMirror for Code Editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/display/placeholder.min.js"></script>
+
+    <style>
+        nav{
+            height: 30px;
+            font-size: larger;
+            font-weight: 500;
+            margin-top: 5px;
+            color: #61dafb;
+            display: flex;
+            background-color: #03323f;
+            justify-content: space-between;
+        }
+        body { 
+            font-family:'Times New Roman', Times, serif; 
+            background-color: #282c34; 
+            color: white; 
+            margin: 0px;
+        }
+        h1 { 
+            color: #61dafb; 
+        }
+        .CodeMirror {
+            border: 1px solid #ccc; 
+            height: 300px;
+        }
+        pre { 
+            background-color: black; 
+            color: lime; padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+        }
+        .output-container, .error-container { 
+            display: none; 
+        }
+        label{
+            color: #61dafb;
+        }
+        .run{
+            height: 25px;
+            background-color: #03323f;
+            color: #61fb6e;
+            display: flex;
+            text-align: center;
+            justify-content: center;
+            border: #03323f;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav>
+    <div>Online Compiler <img src="" alt=""></div>
+    <button class="run"type="submit">▶</button>
+
+    <form method="post" onsubmit="clearOutput()">
+        <label for="language">Select Language:</label>
+        <select name="language" id="language" onchange="changeLanguage()">
+            <option value="python" {% if language == "python" %}selected{% endif %}>Python</option>
+            <option value="cpp" {% if language == "cpp" %}selected{% endif %}>C++</option>
+            <option value="java" {% if language == "java" %}selected{% endif %}>Java</option>
+        </select>
+        
+        <br><br>
+        
+
+    </form>
+
+    </nav>
+    <br><br>
+
+    <!-- CodeMirror Textarea -->
+    <textarea name="code" id="code">{{ code }}</textarea><br>
+    <button type="submit">Run</button>
+
+    <div id="outputContainer" class="output-container">
+        <h2>Output:</h2>
+        <pre id="output">{{ output }}</pre>
+    </div>
+
+    <div id="errorContainer" class="error-container">
+        <h2>Error:</h2>
+        <pre id="error" style="color:red;">{{ error }}</pre>
+    </div>
+
+    <script>
+        let editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            mode: "text/x-python",
+            theme: "dracula",
+            lineNumbers: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            indentUnit: 4,
+            tabSize: 4,
+            extraKeys: { "Tab": function(cm) { cm.execCommand("insertSoftTab"); } }
+        });
+
+        function changeLanguage() {
+            let language = document.getElementById("language").value;
+            let mode = "text/x-python";
+            if (language === "cpp") mode = "text/x-c++src";
+            if (language === "java") mode = "text/x-java";
+
+            editor.setOption("mode", mode);
+            document.querySelector("nav").submit();
+        }
+
+        function clearOutput() {
+            // Clear previous output and error before running new code
+            document.getElementById("output").innerText = "";
+            document.getElementById("error").innerText = "";
+            document.getElementById("outputContainer").style.display = "none";
+            document.getElementById("errorContainer").style.display = "none";
+        }
+        document.getElementById("runButton").addEventListener("click", function () {
+        document.querySelector("form").submit();
+        });
+        editor.setValue(`{{ code | safe }}`);
+
+        // Show output or error if available
+        {% if output %}
+            document.getElementById("outputContainer").style.display = "block";
+        {% endif %}
+
+        {% if error %}
+            document.getElementById("errorContainer").style.display = "block";
+        {% endif %}
+    </script>
+    <br>
+    <br><br>
+
+</body>
+</html>
